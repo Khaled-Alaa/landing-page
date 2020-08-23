@@ -15,7 +15,7 @@
 
 /* Define Global Variables */
 var menu = document.querySelector("ul");
-var sections = document.querySelectorAll("h2");
+var sections = document.querySelectorAll("section");
 /* End Global Variables*/
 
 /* Start Helper Functions
@@ -28,17 +28,18 @@ var sections = document.querySelectorAll("h2");
  *
  */
 
-
 // build the nav
 for (const section of sections) {
   var item = document.createElement("li");
   const coordinate = offset(section);
+  console.log(coordinate);
   item.addEventListener("click", function () {
     removeActivte(document.querySelectorAll("li"));
     this.setAttribute("class", "active_item");
     window.scrollTo({ top: coordinate.top - 200, behavior: "smooth" });
   });
-  item.textContent = section.innerText;
+  item.setAttribute("id", `${section.getAttribute("id")}-menuitem`);
+  item.textContent = section.querySelector("h2").innerText;
   menu.appendChild(item);
 }
 // Add class 'active' to section when near top of viewport
@@ -57,9 +58,13 @@ for (const section of sections) {
 
 function offset(element) {
   var rect = element.getBoundingClientRect(),
-    scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
-    scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-  return { top: rect.top + scrollTop, left: rect.left + scrollLeft };
+    scrollTop = window.pageYOffset || document.documentElement.scrollTop,
+    height = rect.height,
+    bottom = rect.top + scrollTop + height;
+  return {
+    top: rect.top + scrollTop - 100,
+    bottom: bottom,
+  };
 }
 
 // Set sections as active
@@ -70,3 +75,19 @@ function removeActivte(items) {
   }
 }
 
+window.addEventListener("scroll", function () {
+  var scrollingDetector = window.scrollY;
+  removeActivte(document.querySelectorAll("li"));
+  for (const section of sections) {
+    const coordinate = offset(section);
+    if (
+      coordinate.top <= scrollingDetector &&
+      scrollingDetector <= coordinate.bottom
+    ) {
+      var menuItem = document.querySelector(
+        `li#${section.getAttribute("id")}-menuitem`
+      );
+      menuItem.classList.add("active_item");
+    }
+  }
+});
